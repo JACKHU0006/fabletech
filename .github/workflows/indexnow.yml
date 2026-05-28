@@ -1,0 +1,101 @@
+name: Submit to IndexNow
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 2 * * *'  # Run daily at 2 AM UTC
+  workflow_dispatch:
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Submit to IndexNow
+        run: |
+          node - << 'EOF'
+          const SITE_URL = 'https://www.fabletech.cc.cd';
+          const API_KEY = '6444d163bf5d40c6a9b00dd95dd64dba';
+          const KEY_URL = `${SITE_URL}/${API_KEY}.txt`;
+          
+          const INDEXNOW_ENDPOINTS = [
+            'https://www.bing.com/indexnow',
+            'https://api.indexnow.org/indexnow'
+          ];
+          
+          // Generate all site URLs
+          function getAllUrls() {
+            const urls = [
+              SITE_URL,
+              `${SITE_URL}/about`,
+              `${SITE_URL}/products`,
+              `${SITE_URL}/news`,
+              `${SITE_URL}/service`,
+              `${SITE_URL}/contact`,
+              `${SITE_URL}/faq`,
+              `${SITE_URL}/search`,
+              `${SITE_URL}/sitemap`
+            ];
+            
+            // Add language variants
+            const langs = ['de', 'fr', 'es', 'ar'];
+            const pages = ['about', 'products', 'news', 'service', 'contact', 'faq'];
+            langs.forEach(lang => {
+              pages.forEach(page => {
+                urls.push(`${SITE_URL}/${lang}/${page}`);
+              });
+            });
+            
+            // Add product and news pages
+            for (let i = 1; i <= 12; i++) {
+              urls.push(`${SITE_URL}/products/prod-${String(i).padStart(3, '0')}`);
+            }
+            for (let i = 1; i <= 25; i++) {
+              urls.push(`${SITE_URL}/news/news-${String(i).padStart(3, '0')}`);
+            }
+            
+            return urls;
+          }
+          
+          const payload = {
+            host: new URL(SITE_URL).host,
+            key: API_KEY,
+            keyLocation: KEY_URL,
+            urlList: getAllUrls()
+          };
+          
+          console.log(`Submitting ${payload.urlList.length} URLs to IndexNow...`);
+          
+          async function submit() {
+            for (const endpoint of INDEXNOW_ENDPOINTS) {
+              try {
+                const response = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                });
+                
+                if (response.ok || response.status === 202) {
+                  console.log(`✅ ${endpoint}: Success`);
+                } else {
+                  console.log(`⚠️ ${endpoint}: Status ${response.status}`);
+                }
+              } catch (error) {
+                console.log(`❌ ${endpoint}: ${error.message}`);
+              }
+            }
+            console.log('\n✅ IndexNow submission complete!');
+          }
+          
+          submit();
+          EOF

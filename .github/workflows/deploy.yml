@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Build Astro site
-        run: npm run build
+        run: npx astro build
         env:
           CDN_URL: https://${{ secrets.CDN_DOMAIN }}
           PUBLIC_CDN_URL: https://${{ secrets.CDN_DOMAIN }}

@@ -1,6 +1,8 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
+:root {
   --color-primary: #1e3a5f;
   --color-primary-dark: #152a45;
   --color-primary-light: #2d5a87;
@@ -33,11 +35,10 @@ body {
   background-color: var(--color-gray-50);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-  .rtl {
-    direction: rtl;
-  }
+.text-balance {
+  text-wrap: balance;
+}
+
+.rtl {
+  direction: rtl;
 }

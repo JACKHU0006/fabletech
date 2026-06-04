@@ -1,4 +1,4 @@
-name: Build and Deploy with R2 Images
+name: Build and Deploy
 
 on:
   push:
@@ -26,10 +26,10 @@ jobs:
       - name: Build Astro site
         run: npm run build
         env:
-          CDN_URL: https://${{ secrets.CDN_DOMAIN }}
-          PUBLIC_CDN_URL: https://${{ secrets.CDN_DOMAIN }}
+          PUBLIC_CDN_URL: ${{ secrets.CDN_DOMAIN && format('https://{0}', secrets.CDN_DOMAIN) || '' }}
 
-      - name: Upload to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN && secrets.CLOUDFLARE_ACCOUNT_ID }}
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -37,3 +37,7 @@ jobs:
           projectName: fabletech
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy skipped (secrets not configured)
+        if: ${{ !secrets.CLOUDFLARE_API_TOKEN || !secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: echo "Deployment skipped - Cloudflare secrets not configured. Build completed successfully."

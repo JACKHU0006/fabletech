@@ -61,6 +61,14 @@ const navItems = {
   ],
 };
 
+const taglines = {
+  en: 'Industrial Excellence Worldwide',
+  de: 'Industrie-Exzellenz weltweit',
+  fr: 'Excellence industrielle mondiale',
+  es: 'Excelencia industrial mundial',
+  ar: 'التميز الصناعي في جميع أنحاء العالم',
+};
+
 const locales = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
   { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
@@ -70,72 +78,81 @@ const locales = [
 ];
 ---
 
-<header class="bg-white shadow-sm sticky top-0 z-50">
+<header class="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-50 border-b border-gray-100">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16">
-        <div class="flex items-center">
-          <a href="/" class="flex-shrink-0">
-            <svg width="130" height="40" viewBox="0 0 130 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" style="stop-color:#1e40af"/>
-                  <stop offset="50%" style="stop-color:#059669"/>
-                  <stop offset="100%" style="stop-color:#1e40af"/>
-                </linearGradient>
-              </defs>
-              <text x="0" y="28" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="700" fill="url(#logoGrad)">FableTech</text>
-            </svg>
-          </a>
+    <div class="flex items-center justify-between h-20">
+      <a href="/" class="flex items-center gap-4 group">
+        <svg width="130" height="40" viewBox="0 0 130 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-auto h-10">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#1e40af"/>
+              <stop offset="50%" style="stop-color:#059669"/>
+              <stop offset="100%" style="stop-color:#1e40af"/>
+            </linearGradient>
+          </defs>
+          <text x="0" y="28" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="700" fill="url(#logoGrad)">FableTech</text>
+        </svg>
+        <div class="hidden sm:block">
+          <p class="text-xs font-medium text-gray-500 tracking-wider uppercase transition-colors group-hover:text-primary">
+            {taglines[locale as keyof typeof taglines]}
+          </p>
         </div>
+      </a>
 
       <nav class="hidden md:flex items-center space-x-1">
         {navItems[locale as keyof typeof navItems].map((item) => (
           <a
             key={item.href}
             href={item.href}
-            class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
+            class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-all duration-200 relative group"
           >
             {item.label}
+            <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-primary rounded-full transition-all duration-200 group-hover:w-3/4" />
           </a>
         ))}
       </nav>
 
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2">
         <div class="relative">
           <button
             id="locale-button"
-            class="flex items-center space-x-1 px-3 py-2 rounded-md text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors"
+            class="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-gray-600 hover:text-primary hover:bg-gray-50 transition-all duration-200"
           >
             <Globe class="h-4 w-4" />
             <span class="text-sm font-medium">
-              {locales.find(l => l.code === locale)?.flag} {locales.find(l => l.code === locale)?.label}
+              {locales.find(l => l.code === locale)?.flag} {locales.find(l => l.code === locale)?.label.split('').slice(0, 2).join('')}
             </span>
           </button>
-          <div id="locale-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 hidden">
+          <div id="locale-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 hidden opacity-0 transform translate-y-2 transition-all duration-200">
             {locales.map((loc) => (
               <button
                 key={loc.code}
                 onclick={`switchLanguage('${loc.code}')`}
-                class={`w-full flex items-center space-x-2 px-4 py-2 text-sm hover:bg-gray-50 ${locale === loc.code ? 'text-primary font-medium' : 'text-gray-700'}`}
+                class={`w-full flex items-center space-x-2 px-4 py-2.5 text-sm transition-all duration-150 ${locale === loc.code ? 'bg-primary/5 text-primary font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
               >
-                <span>{loc.flag}</span>
+                <span class="text-lg">{loc.flag}</span>
                 <span>{loc.label}</span>
+                {locale === loc.code && (
+                  <svg class="w-4 h-4 ml-auto text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
               </button>
             ))}
           </div>
         </div>
 
-        <button id="search-button" class="p-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors">
+        <button id="search-button" class="p-2.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-all duration-200">
           <Search class="h-5 w-5" />
         </button>
 
-        <a href="/auth/login" class="p-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors">
+        <a href="/auth/login" class="p-2.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-all duration-200">
           <User class="h-5 w-5" />
         </a>
 
         <button
           id="mobile-menu-button"
-          class="md:hidden p-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
+          class="md:hidden p-2.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-all duration-200"
         >
           <Menu class="h-6 w-6" />
         </button>
@@ -143,13 +160,13 @@ const locales = [
     </div>
   </div>
 
-  <div id="mobile-menu" class="md:hidden bg-white border-t hidden">
-    <div class="px-2 pt-2 pb-3 space-y-1">
+  <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 hidden">
+    <div class="px-4 py-4 space-y-1">
       {navItems[locale as keyof typeof navItems].map((item) => (
         <a
           key={item.href}
           href={item.href}
-          class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md"
+          class="block px-4 py-3 text-base font-medium text-gray-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
         >
           {item.label}
         </a>
@@ -160,24 +177,29 @@ const locales = [
 
 <script id="search-data" type="application/json" data-locale={locale} set:html={JSON.stringify(searchData)} />
 
-<div id="search-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-start justify-center pt-20">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
-    <div class="p-4">
+<div id="search-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-start justify-center pt-20">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
+    <div class="p-4 border-b border-gray-100">
       <div class="flex items-center space-x-4">
-        <Search class="h-5 w-5 text-gray-400" />
+        <div class="p-2 bg-primary/10 rounded-lg">
+          <Search class="h-5 w-5 text-primary" />
+        </div>
         <input 
           type="text" 
           id="search-input"
           placeholder="Search products, news, pages..."
-          class="flex-1 text-lg outline-none"
+          class="flex-1 text-lg outline-none text-gray-800 placeholder-gray-400"
         />
-        <button id="close-search" class="text-gray-400 hover:text-gray-600">
+        <button id="close-search" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
           <X class="h-5 w-5" />
         </button>
       </div>
     </div>
-    <div id="search-results" class="border-t max-h-96 overflow-y-auto">
-      <div class="p-4 text-gray-500 text-center" id="search-placeholder">Type to search...</div>
+    <div id="search-results" class="max-h-96 overflow-y-auto">
+      <div class="p-6 text-gray-500 text-center" id="search-placeholder">
+        <div class="mb-2">Type to search...</div>
+        <div class="text-sm text-gray-400">Try: products, news, factory, service</div>
+      </div>
     </div>
   </div>
 </div>
@@ -204,7 +226,7 @@ const locales = [
     const resultsContainer = document.getElementById('search-results');
     
     if (!searchQuery) {
-      resultsContainer.innerHTML = '<div class="p-4 text-gray-500 text-center" id="search-placeholder">Type to search...</div>';
+      resultsContainer.innerHTML = '<div class="p-6 text-gray-500 text-center" id="search-placeholder"><div class="mb-2">Type to search...</div><div class="text-sm text-gray-400">Try: products, news, factory, service</div></div>';
       return;
     }
 
@@ -221,7 +243,7 @@ const locales = [
     }).slice(0, 10);
 
     if (results.length === 0) {
-      resultsContainer.innerHTML = '<div class="p-4 text-gray-500 text-center">No results found...</div>';
+      resultsContainer.innerHTML = '<div class="p-6 text-gray-500 text-center">No results found...</div>';
       return;
     }
 
@@ -229,12 +251,12 @@ const locales = [
       const title = item.title[currentLocale] || item.title['en'] || '';
       const description = item.description[currentLocale] || item.description['en'] || '';
       
-      return '<a href="' + item.url + '" class="flex items-start space-x-3 p-4 hover:bg-gray-50 transition-colors border-b last:border-b-0">' +
-        '<div class="flex-shrink-0 mt-1">' + getIcon(item.type) + '</div>' +
+      return '<a href="' + item.url + '" class="flex items-start space-x-3 p-4 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-b-0">' +
+        '<div class="flex-shrink-0 mt-0.5">' + getIcon(item.type) + '</div>' +
         '<div class="flex-1 min-w-0">' +
           '<div class="flex items-center space-x-2">' +
             '<span class="font-medium text-gray-900">' + title + '</span>' +
-            (item.category ? '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">' + item.category + '</span>' : '') +
+            (item.category ? '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">' + item.category + '</span>' : '') +
           '</div>' +
           '<p class="text-sm text-gray-500 mt-1 line-clamp-2">' + description + '</p>' +
         '</div>' +
@@ -264,6 +286,10 @@ const locales = [
       localeButton.addEventListener('click', function(e) {
         e.stopPropagation();
         localeDropdown.classList.toggle('hidden');
+        setTimeout(() => {
+          localeDropdown.classList.toggle('opacity-0');
+          localeDropdown.classList.toggle('translate-y-2');
+        }, 10);
       });
     }
 
@@ -282,7 +308,10 @@ const locales = [
 
     document.addEventListener('click', function(e) {
       if (localeButton && localeDropdown && !localeButton.contains(e.target)) {
-        localeDropdown.classList.add('hidden');
+        localeDropdown.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => {
+          localeDropdown.classList.add('hidden');
+        }, 200);
       }
     });
 
@@ -294,20 +323,29 @@ const locales = [
     if (searchButton && searchModal) {
       searchButton.addEventListener('click', function() {
         searchModal.classList.remove('hidden');
+        setTimeout(() => {
+          searchModal.classList.add('opacity-100');
+        }, 10);
         if (searchInput) searchInput.focus();
       });
     }
 
     if (closeSearch && searchModal) {
       closeSearch.addEventListener('click', function() {
-        searchModal.classList.add('hidden');
+        searchModal.classList.remove('opacity-100');
+        setTimeout(() => {
+          searchModal.classList.add('hidden');
+        }, 200);
       });
     }
 
     if (searchModal) {
       searchModal.addEventListener('click', function(e) {
         if (e.target === searchModal) {
-          searchModal.classList.add('hidden');
+          searchModal.classList.remove('opacity-100');
+          setTimeout(() => {
+            searchModal.classList.add('hidden');
+          }, 200);
         }
       });
     }
@@ -320,7 +358,10 @@ const locales = [
 
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && searchModal) {
-        searchModal.classList.add('hidden');
+        searchModal.classList.remove('opacity-100');
+        setTimeout(() => {
+          searchModal.classList.add('hidden');
+        }, 200);
       }
       if (e.key === '/' && e.target.tagName !== 'INPUT') {
         e.preventDefault();

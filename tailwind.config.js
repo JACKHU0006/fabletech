@@ -2,26 +2,19 @@
 export default {
   content: [
     "./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}",
-    "./pages/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}",
-    "./components/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}",
-    "./layouts/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}",
+    "./public/**/*.{html,js}",
   ],
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#1e3a5f',
-          600: '#1e40af',
-          700: '#1e3a8a',
-          800: '#1e3a5f',
-          900: '#152a45',
-        },
+        primary: '#1e3a5f',
+        'primary-dark': '#152a45',
+        'primary-light': '#2d5a87',
         secondary: '#f59e0b',
+        accent: '#3b82f6',
+        success: '#10b981',
+        warning: '#f59e0b',
+        danger: '#ef4444',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

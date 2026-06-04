@@ -23,9 +23,33 @@ const {
   alternateLocales = ['en', 'de', 'fr', 'es', 'ar'],
 } = Astro.props;
 
-const siteUrl = import.meta.env.SITE_URL || 'https://fabletech.example.com';
-const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
+const siteUrl = import.meta.env.SITE_URL || 'https://www.fabletech.cc.cd';
+
+function getCanonicalUrl(): string {
+  const pathname = Astro.url.pathname;
+  if (locale !== 'en') {
+    const localePrefix = `/${locale}`;
+    if (pathname.startsWith(localePrefix)) {
+      return `${siteUrl}${pathname.slice(localePrefix.length) || '/'}`;
+    }
+  }
+  return `${siteUrl}${pathname}`;
+}
+
+const canonicalUrl = getCanonicalUrl();
 const imageUrl = new URL(image, siteUrl).href;
+
+function getAlternateUrl(altLocale: string): string {
+  const pathname = Astro.url.pathname;
+  if (locale !== 'en') {
+    const localePrefix = `/${locale}`;
+    if (pathname.startsWith(localePrefix)) {
+      const basePath = pathname.slice(localePrefix.length) || '/';
+      return altLocale === 'en' ? `${siteUrl}${basePath}` : `${siteUrl}/${altLocale}${basePath}`;
+    }
+  }
+  return altLocale === 'en' ? `${siteUrl}${pathname}` : `${siteUrl}/${altLocale}${pathname}`;
+}
 ---
 
 <meta charset="UTF-8" />
@@ -38,7 +62,8 @@ const imageUrl = new URL(image, siteUrl).href;
   <link
     rel="alternate"
     hreflang={altLocale}
-    href={altLocale === 'en' ? canonicalUrl : `${siteUrl}/${altLocale}${Astro.url.pathname}`}
+    href={getAlternateUrl(altLocale)}
+    key={altLocale}
   />
 ))}
 <link rel="alternate" hreflang="x-default" href={canonicalUrl} />

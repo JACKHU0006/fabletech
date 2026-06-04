@@ -1,21 +1,50 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
-import { Search, ArrowRight, Package, FileText, Home } from '@lucide/astro';
-import { search, searchData } from '../data/search';
+import { Search, ArrowRight, Package, FileText, Home, Filter, X } from '@lucide/astro';
+import { search, searchData, type SearchResult } from '../data/search';
 
-const locale = 'en';
+const locale = Astro.url.searchParams.get('lang') || 'en';
 const query = Astro.url.searchParams.get('q') || '';
-const results = query ? search(query, locale) : [];
+const filterType = Astro.url.searchParams.get('type') || '';
+
+let results = query ? search(query, locale) : [];
+
+if (filterType) {
+  results = results.filter(r => r.type === filterType);
+}
 
 const breadcrumbItems = [
-  { name: 'Search', href: '/search' }
+  { name: { en: 'Search', de: 'Suche', fr: 'Recherche', es: 'Búsqueda', ar: 'بحث' }, href: '/search' }
 ];
+
+const popularSearches = [
+  { term: 'steel products', category: 'product' },
+  { term: 'aluminum alloy', category: 'product' },
+  { term: 'copper', category: 'product' },
+  { term: 'new products', category: 'news' },
+  { term: 'certification', category: 'news' },
+];
+
+const typeLabels: Record<string, Record<string, string>> = {
+  all: { en: 'All', de: 'Alle', fr: 'Tous', es: 'Todos', ar: 'الكل' },
+  product: { en: 'Products', de: 'Produkte', fr: 'Produits', es: 'Productos', ar: 'المنتجات' },
+  news: { en: 'News', de: 'Nachrichten', fr: 'Nouvelles', es: 'Noticias', ar: 'الأخبار' },
+  page: { en: 'Pages', de: 'Seiten', fr: 'Pages', es: 'Páginas', ar: 'الصفحات' },
+};
+
+function getTypeLabel(key: string) {
+  return typeLabels[key]?.[locale] || key;
+}
+
+function getFilteredResults(type: string): SearchResult[] {
+  return searchData.filter(r => r.type === type);
+}
 ---
 
 <MainLayout 
-  title="Search Results - FableTech Group" 
-  description={query ? `Search results for "${query}"` : 'Search our website'}
+  title={`${query ? `${query} - ` : ''}Search - FableTech Group`} 
+  description={query ? `Search results for "${query}"` : 'Search our website for products, news, and information'}
   locale={locale}
 >
   <Breadcrumbs items={breadcrumbItems} locale={locale} />
@@ -24,10 +53,23 @@ const breadcrumbItems = [
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center">
         <h1 class="text-4xl md:text-5xl font-bold mb-4">
-          Search Results
+          {locale === 'en' ? 'Search Results' : 
+           locale === 'de' ? 'Suchergebnisse' :
+           locale === 'fr' ? 'Résultats de recherche' :
+           locale === 'es' ? 'Resultados de búsqueda' :
+           'نتائج البحث'}
         </h1>
         <p class="text-lg text-gray-200">
-          {query ? `Results for "${query}"` : 'Enter a search term to find what you need'}
+          {query ? `${locale === 'en' ? 'Results for' : 
+                    locale === 'de' ? 'Ergebnisse für' :
+                    locale === 'fr' ? 'Résultats pour' :
+                    locale === 'es' ? 'Resultados para' :
+                    'نتائج'} "${query}"` : 
+           locale === 'en' ? 'Enter a search term to find what you need' :
+           locale === 'de' ? 'Geben Sie einen Suchbegriff ein, um zu finden, was Sie brauchen' :
+           locale === 'fr' ? 'Entrez un terme de recherche pour trouver ce que vous cherchez' :
+           locale === 'es' ? 'Ingrese un término de búsqueda para encontrar lo que necesita' :
+           'أدخل مصطلح البحث للعثور على ما تحتاجه'}
         </p>
       </div>
     </div>
@@ -35,125 +77,308 @@ const breadcrumbItems = [
 
   <section class="py-12">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <form method="GET" action="/search" class="mb-8">
+      <form id="search-form" method="GET" action="/search" class="mb-8">
         <div class="relative">
           <Search class="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="text"
+            id="search-input"
             name="q"
             value={query}
             class="w-full pl-12 pr-4 py-4 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-lg"
-            placeholder="Search products, news, and more..."
+            placeholder={locale === 'en' ? 'Search products, news, and more...' :
+                         locale === 'de' ? 'Produkte, Nachrichten und mehr durchsuchen...' :
+                         locale === 'fr' ? 'Rechercher des produits, des nouvelles, etc...' :
+                         locale === 'es' ? 'Buscar productos, noticias y más...' :
+                         'ابحث عن المنتجات والأخبار والمزيد...'}
             autofocus={!query}
           />
           <button 
             type="submit"
             class="absolute right-2 top-1/2 transform -translate-y-1/2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
           >
-            Search
+            {locale === 'en' ? 'Search' : locale === 'de' ? 'Suchen' : locale === 'fr' ? 'Rechercher' : locale === 'es' ? 'Buscar' : 'ابحث'}
           </button>
         </div>
       </form>
 
       {query && (
         <div class="mb-6">
-          <p class="text-gray-600">
-            Found <span class="font-semibold text-gray-900">{results.length}</span> results
-          </p>
+          <div class="flex flex-wrap items-center gap-4">
+            <p class="text-gray-600">
+              {locale === 'en' ? 'Found' : 
+               locale === 'de' ? 'Gefunden' :
+               locale === 'fr' ? 'Trouvé' :
+               locale === 'es' ? 'Encontrados' :
+               'وجد'} <span class="font-semibold text-gray-900">{results.length}</span> {locale === 'en' ? 'results' : locale === 'de' ? 'Ergebnisse' : locale === 'fr' ? 'résultats' : locale === 'es' ? 'resultados' : 'نتائج'}
+            </p>
+            
+            <div class="flex items-center gap-2">
+              <Filter class="h-4 w-4 text-gray-400" />
+              <div class="flex gap-2">
+                {(['all', 'product', 'news', 'page'] as const).map(type => (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      const url = new URL('/search', window.location.origin);
+                      url.searchParams.set('q', query);
+                      if (type !== 'all') {
+                        url.searchParams.set('type', type);
+                      } else {
+                        url.searchParams.delete('type');
+                      }
+                      window.location.href = url.toString();
+                    }}
+                    class={`px-3 py-1 text-sm rounded-full transition-colors ${
+                      !filterType && type === 'all' || filterType === type
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {getTypeLabel(type)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      {results.length > 0 ? (
-        <div class="space-y-6">
-          {results.map((result) => (
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-              <div class="flex items-start gap-4">
-                <div class="flex-shrink-0">
-                  {result.type === 'product' && (
-                    <div class="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
-                      <Package class="h-6 w-6 text-secondary" />
-                    </div>
-                  )}
-                  {result.type === 'news' && (
-                    <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <FileText class="h-6 w-6 text-primary" />
-                    </div>
-                  )}
-                  {result.type === 'page' && (
-                    <div class="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
-                      <Home class="h-6 w-6 text-success" />
-                    </div>
-                  )}
-                </div>
-                <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class={`px-2 py-1 text-xs font-medium rounded ${
-                      result.type === 'product' ? 'bg-secondary/10 text-secondary' :
-                      result.type === 'news' ? 'bg-primary/10 text-primary' :
-                      'bg-success/10 text-success'
-                    }`}>
-                      {result.type === 'product' ? 'Product' :
-                       result.type === 'news' ? 'News' : 'Page'}
-                    </span>
-                    {result.category && (
-                      <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">
-                        {result.category}
-                      </span>
+      <div id="search-results">
+        {results.length > 0 ? (
+          <div class="space-y-4">
+            {results.map((result) => (
+              <div key={result.id} class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-start gap-4">
+                  <div class="flex-shrink-0">
+                    {result.type === 'product' && (
+                      <div class="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
+                        <Package class="h-6 w-6 text-secondary" />
+                      </div>
+                    )}
+                    {result.type === 'news' && (
+                      <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <FileText class="h-6 w-6 text-primary" />
+                      </div>
+                    )}
+                    {result.type === 'page' && (
+                      <div class="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
+                        <Home class="h-6 w-6 text-success" />
+                      </div>
                     )}
                   </div>
-                  <h3 class="text-xl font-semibold mb-2">
-                    <a href={result.url} class="hover:text-primary transition-colors">
-                      {result.title[locale] || result.title['en']}
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class={`px-2 py-1 text-xs font-medium rounded ${
+                        result.type === 'product' ? 'bg-secondary/10 text-secondary' :
+                        result.type === 'news' ? 'bg-primary/10 text-primary' :
+                        'bg-success/10 text-success'
+                      }`}>
+                        {getTypeLabel(result.type)}
+                      </span>
+                      {result.category && (
+                        <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">
+                          {result.category}
+                        </span>
+                      )}
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">
+                      <a href={result.url} class="hover:text-primary transition-colors">
+                        {result.title[locale] || result.title['en']}
+                      </a>
+                    </h3>
+                    <p class="text-gray-600 mb-3 line-clamp-2">
+                      {result.description[locale] || result.description['en']}
+                    </p>
+                    <a 
+                      href={result.url}
+                      class="inline-flex items-center text-secondary font-medium hover:underline"
+                    >
+                      {locale === 'en' ? 'View Details' : 
+                       locale === 'de' ? 'Details anzeigen' :
+                       locale === 'fr' ? 'Voir les détails' :
+                       locale === 'es' ? 'Ver detalles' :
+                       'عرض التفاصيل'}
+                      <ArrowRight class="ml-2 h-4 w-4" />
                     </a>
-                  </h3>
-                  <p class="text-gray-600 mb-3 line-clamp-2">
-                    {result.description[locale] || result.description['en']}
-                  </p>
-                  <a 
-                    href={result.url}
-                    class="inline-flex items-center text-secondary font-medium hover:underline"
-                  >
-                    View Details
-                    <ArrowRight class="ml-2 h-4 w-4" />
-                  </a>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+        ) : query ? (
+          <div class="text-center py-16">
+            <div class="text-6xl mb-4">🔍</div>
+            <h3 class="text-2xl font-semibold text-gray-900 mb-2">
+              {locale === 'en' ? 'No Results Found' : 
+               locale === 'de' ? 'Keine Ergebnisse gefunden' :
+               locale === 'fr' ? 'Aucun résultat trouvé' :
+               locale === 'es' ? 'No se encontraron resultados' :
+               'لم يتم العثور على نتائج'}
+            </h3>
+            <p class="text-gray-600 mb-6">
+              {locale === 'en' ? "We couldn't find anything matching your search term." :
+               locale === 'de' ? 'Wir konnten nichts finden, das Ihrem Suchbegriff entspricht.' :
+               locale === 'fr' ? "Nous n'avons rien trouvé correspondant à votre terme de recherche." :
+               locale === 'es' ? "No pudimos encontrar nada que coincida con su término de búsqueda." :
+               'لم نتمكن من العثور على أي شيء يتطابق مع مصطلح البحث الخاص بك.'}
+            </p>
+            <p class="text-gray-500 text-sm mb-4">
+              {locale === 'en' ? 'Try different keywords or browse our categories:' :
+               locale === 'de' ? 'Versuchen Sie andere Schlüsselwörter oder durchsuchen Sie unsere Kategorien:' :
+               locale === 'fr' ? 'Essayez d autres mots-clés ou parcourez nos catégories:' :
+               locale === 'es' ? 'Pruebe diferentes palabras clave o explore nuestras categorías:' :
+               'جرب كلمات مفتاحية مختلفة أو تصفح فئاتنا:'}
+            </p>
+            <div class="flex flex-wrap justify-center gap-2">
+              <a href="/products" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                {locale === 'en' ? 'Products' : locale === 'de' ? 'Produkte' : locale === 'fr' ? 'Produits' : locale === 'es' ? 'Productos' : 'المنتجات'}
+              </a>
+              <a href="/news" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                {locale === 'en' ? 'News' : locale === 'de' ? 'Nachrichten' : locale === 'fr' ? 'Nouvelles' : locale === 'es' ? 'Noticias' : 'الأخبار'}
+              </a>
+              <a href="/faq" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                FAQ
+              </a>
             </div>
-          ))}
-        </div>
-      ) : query ? (
-        <div class="text-center py-16">
-          <div class="text-6xl mb-4">🔍</div>
-          <h3 class="text-2xl font-semibold text-gray-900 mb-2">No Results Found</h3>
-          <p class="text-gray-600 mb-6">We couldn't find anything matching your search term.</p>
-          <p class="text-gray-500 text-sm">Try different keywords or browse our categories:</p>
-          <div class="flex flex-wrap justify-center gap-2 mt-4">
-            <a href="/products" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-              Products
-            </a>
-            <a href="/news" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-              News
-            </a>
-            <a href="/faq" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-              FAQ
-            </a>
           </div>
-        </div>
-      ) : (
-        <div class="text-center py-16">
-          <div class="text-6xl mb-4">💡</div>
-          <h3 class="text-2xl font-semibold text-gray-900 mb-2">What are you looking for?</h3>
-          <p class="text-gray-600 mb-6">Try searching for products, news, or information about our services.</p>
-          <div class="flex flex-wrap justify-center gap-2">
-            <a href="/products" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-              Browse Products
-            </a>
-            <a href="/news" class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors">
-              Latest News
-            </a>
+        ) : (
+          <div class="text-center">
+            <div class="text-6xl mb-4">💡</div>
+            <h3 class="text-2xl font-semibold text-gray-900 mb-2">
+              {locale === 'en' ? 'What are you looking for?' :
+               locale === 'de' ? 'Was suchen Sie?' :
+               locale === 'fr' ? 'Que cherchez-vous ?' :
+               locale === 'es' ? '¿Qué está buscando?' :
+               'ماذا تبحث عنه؟'}
+            </h3>
+            <p class="text-gray-600 mb-6">
+              {locale === 'en' ? 'Try searching for products, news, or information about our services.' :
+               locale === 'de' ? 'Versuchen Sie, nach Produkten, Nachrichten oder Informationen über unsere Dienstleistungen zu suchen.' :
+               locale === 'fr' ? 'Essayez de rechercher des produits, des nouvelles ou des informations sur nos services.' :
+               locale === 'es' ? 'Intente buscar productos, noticias o información sobre nuestros servicios.' :
+               'جرب البحث عن المنتجات أو الأخبار أو المعلومات المتعلقة بخدماتنا.'}
+            </p>
+            
+            <div class="mb-8">
+              <p class="text-gray-500 text-sm mb-3">
+                {locale === 'en' ? 'Popular searches:' :
+                 locale === 'de' ? 'Beliebte Suchanfragen:' :
+                 locale === 'fr' ? 'Recherches populaires:' :
+                 locale === 'es' ? 'Búsquedas populares:' :
+                 'البحثات الشائعة:'}
+              </p>
+              <div class="flex flex-wrap justify-center gap-2">
+                {popularSearches.map((item, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      const url = new URL('/search', window.location.origin);
+                      url.searchParams.set('q', item.term);
+                      if (item.category) {
+                        url.searchParams.set('type', item.category);
+                      }
+                      window.location.href = url.toString();
+                    }}
+                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    {item.term}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+              <div class="bg-gray-50 rounded-lg p-6">
+                <div class="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Package class="h-6 w-6 text-secondary" />
+                </div>
+                <h4 class="font-semibold text-gray-900 mb-2">
+                  {locale === 'en' ? 'Browse Products' : locale === 'de' ? 'Produkte durchsuchen' : locale === 'fr' ? 'Parcourir les produits' : locale === 'es' ? 'Navegar por productos' : 'تصفح المنتجات'}
+                </h4>
+                <p class="text-gray-600 text-sm">
+                  {locale === 'en' ? 'Explore our comprehensive product catalog' :
+                   locale === 'de' ? 'Durchsuchen Sie unseren umfassenden Produktkatalog' :
+                   locale === 'fr' ? 'Explorez notre catalogue de produits complet' :
+                   locale === 'es' ? 'Explore nuestro catálogo de productos completo' :
+                   'استكشف كتالوج المنتجات الشامل لدينا'}
+                </p>
+                <a href="/products" class="inline-flex items-center text-secondary font-medium hover:underline mt-4">
+                  {locale === 'en' ? 'View Products' : locale === 'de' ? 'Produkte anzeigen' : locale === 'fr' ? 'Voir les produits' : locale === 'es' ? 'Ver productos' : 'عرض المنتجات'}
+                  <ArrowRight class="ml-2 h-4 w-4" />
+                </a>
+              </div>
+
+              <div class="bg-gray-50 rounded-lg p-6">
+                <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <FileText class="h-6 w-6 text-primary" />
+                </div>
+                <h4 class="font-semibold text-gray-900 mb-2">
+                  {locale === 'en' ? 'Latest News' : locale === 'de' ? 'Aktuelle Nachrichten' : locale === 'fr' ? 'Dernières nouvelles' : locale === 'es' ? 'Últimas noticias' : 'آخر الأخبار'}
+                </h4>
+                <p class="text-gray-600 text-sm">
+                  {locale === 'en' ? 'Stay updated with the latest industry news' :
+                   locale === 'de' ? 'Bleiben Sie auf dem Laufenden mit den neuesten Branchennachrichten' :
+                   locale === 'fr' ? 'Restez informé des dernières nouvelles de l industrie' :
+                   locale === 'es' ? 'Manténgase actualizado con las últimas noticias de la industria' :
+                   'ابق على اطلاع بأحدث أخبار الصناعة'}
+                </p>
+                <a href="/news" class="inline-flex items-center text-secondary font-medium hover:underline mt-4">
+                  {locale === 'en' ? 'Read News' : locale === 'de' ? 'Nachrichten lesen' : locale === 'fr' ? 'Lire les nouvelles' : locale === 'es' ? 'Leer noticias' : 'اقرأ الأخبار'}
+                  <ArrowRight class="ml-2 h-4 w-4" />
+                </a>
+              </div>
+
+              <div class="bg-gray-50 rounded-lg p-6">
+                <div class="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Home class="h-6 w-6 text-success" />
+                </div>
+                <h4 class="font-semibold text-gray-900 mb-2">
+                  {locale === 'en' ? 'Company Info' : locale === 'de' ? 'Unternehmensinformationen' : locale === 'fr' ? 'Informations sur l entreprise' : locale === 'es' ? 'Información de la empresa' : 'معلومات الشركة'}
+                </h4>
+                <p class="text-gray-600 text-sm">
+                  {locale === 'en' ? 'Learn about our company and services' :
+                   locale === 'de' ? 'Erfahren Sie mehr über unser Unternehmen und unsere Dienstleistungen' :
+                   locale === 'fr' ? 'En savoir plus sur notre entreprise et nos services' :
+                   locale === 'es' ? 'Más información sobre nuestra empresa y servicios' :
+                   'تعرف على شركتنا وخدماتنا'}
+                </p>
+                <a href="/about" class="inline-flex items-center text-secondary font-medium hover:underline mt-4">
+                  {locale === 'en' ? 'About Us' : locale === 'de' ? 'Über uns' : locale === 'fr' ? 'À propos' : locale === 'es' ? 'Sobre nosotros' : 'عن الشركة'}
+                  <ArrowRight class="ml-2 h-4 w-4" />
+                </a>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('search-input');
+      const searchForm = document.getElementById('search-form');
+      const searchResults = document.getElementById('search-results');
+      
+      let debounceTimer: ReturnType<typeof setTimeout>;
+      
+      searchInput?.addEventListener('input', (e) => {
+        const target = e.target as HTMLInputElement;
+        const query = target.value.trim();
+        
+        clearTimeout(debounceTimer);
+        
+        if (query.length >= 2 || query.length === 0) {
+          debounceTimer = setTimeout(() => {
+            const url = new URL('/search', window.location.origin);
+            if (query) {
+              url.searchParams.set('q', query);
+            }
+            window.location.href = url.toString();
+          }, 300);
+        }
+      });
+    });
+  </script>
 </MainLayout>

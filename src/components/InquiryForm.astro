@@ -7,82 +7,177 @@ interface InquiryFormProps {
     id: string;
     name: string;
   }>;
+  locale?: string;
 }
 
 const { 
-  title = 'Send an Inquiry',
-  subtitle = 'Fill out the form below and we will get back to you within 24 hours.',
+  title,
+  subtitle,
   showProductSelect = false,
-  products = []
+  products = [],
+  locale = 'en'
 } = Astro.props;
+
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    title: 'Send an Inquiry',
+    subtitle: 'Fill out the form below and we will get back to you within 24 hours.',
+    name: 'Your Name',
+    email: 'Email Address',
+    company: 'Company Name',
+    phone: 'Phone Number',
+    product: 'Product of Interest',
+    selectProduct: 'Select a product',
+    message: 'Your Message',
+    messagePlaceholder: 'Please describe your requirements, quantities needed, delivery location, etc.',
+    submit: 'Submit Inquiry',
+    successTitle: 'Inquiry Submitted Successfully!',
+    successMessage: 'Thank you for your message. Our team will respond within 24 hours.',
+    errorTitle: 'Something went wrong!',
+    errorMessage: 'Please try again later or contact us directly.'
+  },
+  de: {
+    title: 'Anfrage senden',
+    subtitle: 'Füllen Sie das untenstehende Formular aus, und wir melden uns innerhalb von 24 Stunden bei Ihnen.',
+    name: 'Ihr Name',
+    email: 'E-Mail-Adresse',
+    company: 'Firmenname',
+    phone: 'Telefonnummer',
+    product: 'Interessantes Produkt',
+    selectProduct: 'Produkt auswählen',
+    message: 'Ihre Nachricht',
+    messagePlaceholder: 'Beschreiben Sie bitte Ihre Anforderungen, benötigte Mengen, Lieferort usw.',
+    submit: 'Anfrage absenden',
+    successTitle: 'Anfrage erfolgreich übermittelt!',
+    successMessage: 'Vielen Dank für Ihre Nachricht. Unser Team wird innerhalb von 24 Stunden antworten.',
+    errorTitle: 'Etwas ist schiefgelaufen!',
+    errorMessage: 'Bitte versuchen Sie es später erneut oder kontaktieren Sie uns direkt.'
+  },
+  fr: {
+    title: 'Envoyer une demande',
+    subtitle: 'Remplissez le formulaire ci-dessous et nous vous répondrons dans les 24 heures.',
+    name: 'Votre nom',
+    email: 'Adresse e-mail',
+    company: 'Nom de l\'entreprise',
+    phone: 'Numéro de téléphone',
+    product: 'Produit d\'intérêt',
+    selectProduct: 'Sélectionner un produit',
+    message: 'Votre message',
+    messagePlaceholder: 'Veuillez décrire vos besoins, quantités nécessaires, lieu de livraison, etc.',
+    submit: 'Envoyer la demande',
+    successTitle: 'Demande envoyée avec succès !',
+    successMessage: 'Merci pour votre message. Notre équipe vous répondra dans les 24 heures.',
+    errorTitle: 'Quelque chose a mal fonctionné !',
+    errorMessage: 'Veuillez réessayer plus tard ou contacter nous directement.'
+  },
+  es: {
+    title: 'Enviar una consulta',
+    subtitle: 'Complete el formulario a continuación y le responderemos dentro de las 24 horas.',
+    name: 'Su nombre',
+    email: 'Dirección de correo electrónico',
+    company: 'Nombre de la empresa',
+    phone: 'Número de teléfono',
+    product: 'Producto de interés',
+    selectProduct: 'Seleccionar un producto',
+    message: 'Su mensaje',
+    messagePlaceholder: 'Por favor, describa sus requisitos, cantidades necesarias, ubicación de entrega, etc.',
+    submit: 'Enviar consulta',
+    successTitle: '¡Consulta enviada con éxito!',
+    successMessage: 'Gracias por su mensaje. Nuestro equipo le responderá dentro de las 24 horas.',
+    errorTitle: '¡Algo salió mal!',
+    errorMessage: 'Por favor, inténtelo de nuevo más tarde o contáctenos directamente.'
+  },
+  ar: {
+    title: 'إرسال استفسار',
+    subtitle: 'املأ النموذج أدناه وسنرد عليك في غضون 24 ساعة.',
+    name: 'اسمك',
+    email: 'عنوان البريد الإلكتروني',
+    company: 'اسم الشركة',
+    phone: 'رقم الهاتف',
+    product: 'المنتج المطلوب',
+    selectProduct: 'حدد منتجاً',
+    message: 'رسالتك',
+    messagePlaceholder: 'يرجى وصف احتياجاتك، الكميات المطلوبة، موقع التسليم، إلخ.',
+    submit: 'إرسال الاستفسار',
+    successTitle: 'تم إرسال الاستفسار بنجاح!',
+    successMessage: 'شكراً لرسالتك. سيرد فريقنا عليك في غضون 24 ساعة.',
+    errorTitle: 'حدث خطأ!',
+    errorMessage: 'يرجى المحاولة مرة أخرى لاحقاً أو الاتصال بنا مباشرة.'
+  }
+};
+
+const t = translations[locale] || translations.en;
+
+const displayTitle = title || t.title;
+const displaySubtitle = subtitle || t.subtitle;
 ---
 
 <section class="bg-gray-50 py-12">
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="bg-white rounded-xl shadow-lg p-8">
       <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-2">{title}</h2>
-        <p class="text-gray-600">{subtitle}</p>
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">{displayTitle}</h2>
+        <p class="text-gray-600">{displaySubtitle}</p>
       </div>
       
       <form id="inquiry-form" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Your Name *</label>
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">{t.name} *</label>
             <input
               type="text"
               id="name"
               name="name"
               required
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="John Smith"
+              placeholder={t.name}
             />
           </div>
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">{t.email} *</label>
             <input
               type="email"
               id="email"
               name="email"
               required
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="john@company.com"
+              placeholder={t.email}
             />
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label for="company" class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+            <label for="company" class="block text-sm font-medium text-gray-700 mb-2">{t.company}</label>
             <input
               type="text"
               id="company"
               name="company"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Your Company Ltd."
+              placeholder={t.company}
             />
           </div>
           <div>
-            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">{t.phone}</label>
             <input
               type="tel"
               id="phone"
               name="phone"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="+1 234 567 890"
+              placeholder={t.phone}
             />
           </div>
         </div>
 
         {showProductSelect && products.length > 0 && (
           <div>
-            <label for="product" class="block text-sm font-medium text-gray-700 mb-2">Product of Interest</label>
+            <label for="product" class="block text-sm font-medium text-gray-700 mb-2">{t.product}</label>
             <select
               id="product"
               name="product"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
-              <option value="">Select a product</option>
+              <option value="">{t.selectProduct}</option>
               {products.map((product) => (
                 <option key={product.id} value={product.name}>{product.name}</option>
               ))}
@@ -91,14 +186,14 @@ const {
         )}
 
         <div>
-          <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Your Message *</label>
+          <label for="message" class="block text-sm font-medium text-gray-700 mb-2">{t.message} *</label>
           <textarea
             id="message"
             name="message"
             required
             rows={5}
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-            placeholder="Please describe your requirements, quantities needed, delivery location, etc."
+            placeholder={t.messagePlaceholder}
           ></textarea>
         </div>
 
@@ -109,7 +204,7 @@ const {
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
           </svg>
-          Submit Inquiry
+          {t.submit}
         </button>
       </form>
 
@@ -119,8 +214,18 @@ const {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 class="text-2xl font-bold text-gray-900 mb-2">Inquiry Submitted Successfully!</h3>
-        <p class="text-gray-600">Thank you for your message. Our team will respond within 24 hours.</p>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">{t.successTitle}</h3>
+        <p class="text-gray-600">{t.successMessage}</p>
+      </div>
+
+      <div id="inquiry-error" class="hidden text-center py-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+          <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">{t.errorTitle}</h3>
+        <p class="text-gray-600">{t.errorMessage}</p>
       </div>
     </div>
   </div>
@@ -128,22 +233,43 @@ const {
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('inquiry-form') as HTMLFormElement;
+    const form = document.getElementById('inquiry-form');
     const successMessage = document.getElementById('inquiry-success');
+    const errorMessage = document.getElementById('inquiry-error');
 
-    form?.addEventListener('submit', (e) => {
+    form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      form.style.display = 'none';
-      if (successMessage) {
-        successMessage.classList.remove('hidden');
-      }
-      setTimeout(() => {
-        if (successMessage) {
-          successMessage.classList.add('hidden');
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      try {
+        const response = await fetch('/api/inquiry-google-sheet.json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        
+        if (response.ok) {
+          form.style.display = 'none';
+          if (successMessage) {
+            successMessage.classList.remove('hidden');
+          }
+          setTimeout(() => {
+            if (successMessage) {
+              successMessage.classList.add('hidden');
+            }
+            form.style.display = 'block';
+            form.reset();
+          }, 5000);
+        } else {
+          throw new Error('Submission failed');
         }
-        form.style.display = 'block';
-        form.reset();
-      }, 5000);
+      } catch (error) {
+        console.error('Error:', error);
+        if (errorMessage) {
+          errorMessage.classList.remove('hidden');
+        }
+      }
     });
   });
 </script>

@@ -1,0 +1,176 @@
+---
+import { Share2, Link, Mail, Linkedin, Twitter, Facebook } from '@lucide/astro';
+
+interface SocialShareProps {
+  url?: string;
+  title?: string;
+  description?: string;
+  showLabels?: boolean;
+  platforms?: Array<'linkedin' | 'twitter' | 'facebook' | 'email' | 'copy'>;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const {
+  url = Astro.url.href,
+  title = 'Check out this page from FableTech Group',
+  description = 'Professional B2B industrial solutions provider specializing in high-quality metal products',
+  showLabels = true,
+  platforms = ['linkedin', 'twitter', 'facebook', 'email', 'copy'],
+  size = 'md',
+} = Astro.props;
+
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+const encodedDescription = encodeURIComponent(description);
+
+const shareUrls: Record<string, string> = {
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}&title=${encodedTitle}&summary=${encodedDescription}`,
+  twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+  email: `mailto:?subject=${encodedTitle}&body=${encodedDescription}%0A%0A${encodedUrl}`,
+};
+
+const sizeClasses = {
+  sm: 'p-2',
+  md: 'p-3',
+  lg: 'p-4',
+};
+
+const iconSizes = {
+  sm: 'h-4 w-4',
+  md: 'h-5 w-5',
+  lg: 'h-6 w-6',
+};
+
+const labels: Record<string, Record<string, string>> = {
+  linkedin: {
+    en: 'LinkedIn',
+    de: 'LinkedIn',
+    fr: 'LinkedIn',
+    es: 'LinkedIn',
+    ar: 'لينكد إن'
+  },
+  twitter: {
+    en: 'Twitter',
+    de: 'Twitter',
+    fr: 'Twitter',
+    es: 'Twitter',
+    ar: 'تويتر'
+  },
+  facebook: {
+    en: 'Facebook',
+    de: 'Facebook',
+    fr: 'Facebook',
+    es: 'Facebook',
+    ar: 'فيسبوك'
+  },
+  email: {
+    en: 'Email',
+    de: 'E-Mail',
+    fr: 'E-mail',
+    es: 'Correo',
+    ar: 'البريد'
+  },
+  copy: {
+    en: 'Copy Link',
+    de: 'Link kopieren',
+    fr: 'Copier le lien',
+    es: 'Copiar enlace',
+    ar: 'نسخ الرابط'
+  }
+};
+
+function getLabel(key: string, locale: string): string {
+  return labels[key]?.[locale] || labels[key]?.['en'] || key;
+}
+---
+
+<div class="flex flex-wrap items-center gap-3" data-share-url={url}>
+  {platforms.map((platform) => {
+    if (platform === 'copy') {
+      return (
+        <button
+          type="button"
+          class={`flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all ${sizeClasses[size]}`}
+          data-copy-button
+          aria-label={getLabel('copy', 'en')}
+          title={getLabel('copy', 'en')}
+        >
+          <Link class={iconSizes[size]} />
+          {showLabels && <span class="text-sm font-medium">{getLabel('copy', 'en')}</span>}
+        </button>
+      );
+    }
+    
+    return (
+      <a
+        href={shareUrls[platform]}
+        target="_blank"
+        rel="noopener noreferrer"
+        class={`flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all ${sizeClasses[size]}`}
+        aria-label={getLabel(platform, 'en')}
+        title={getLabel(platform, 'en')}
+      >
+        {platform === 'linkedin' && <Linkedin class={iconSizes[size]} />}
+        {platform === 'twitter' && <Twitter class={iconSizes[size]} />}
+        {platform === 'facebook' && <Facebook class={iconSizes[size]} />}
+        {platform === 'email' && <Mail class={iconSizes[size]} />}
+        {showLabels && <span class="text-sm font-medium">{getLabel(platform, 'en')}</span>}
+      </a>
+    );
+  })}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const copyButtons = document.querySelectorAll('[data-copy-button]');
+    
+    copyButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const shareContainer = button.closest('[data-share-url]');
+        const urlToCopy = shareContainer?.getAttribute('data-share-url') || window.location.href;
+        
+        try {
+          await navigator.clipboard.writeText(urlToCopy);
+          
+          const originalText = button.querySelector('span')?.textContent;
+          if (button.querySelector('span')) {
+            button.querySelector('span').textContent = 'Copied!';
+          }
+          button.classList.add('bg-green-50', 'border-green-500', 'text-green-700');
+          
+          setTimeout(() => {
+            if (originalText && button.querySelector('span')) {
+              button.querySelector('span').textContent = originalText;
+            }
+            button.classList.remove('bg-green-50', 'border-green-500', 'text-green-700');
+          }, 2000);
+        } catch (err) {
+          console.error('Failed to copy:', err);
+          
+          const textArea = document.createElement('textarea');
+          textArea.value = urlToCopy;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-999999px';
+          document.body.appendChild(textArea);
+          textArea.select();
+          try {
+            document.execCommand('copy');
+            const originalText = button.querySelector('span')?.textContent;
+            if (button.querySelector('span')) {
+              button.querySelector('span').textContent = 'Copied!';
+            }
+            setTimeout(() => {
+              if (originalText && button.querySelector('span')) {
+                button.querySelector('span').textContent = originalText;
+              }
+            }, 2000);
+          } catch (e) {
+            console.error('Fallback copy failed:', e);
+          }
+          document.body.removeChild(textArea);
+        }
+      });
+    });
+  });
+</script>

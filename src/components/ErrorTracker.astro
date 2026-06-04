@@ -1,0 +1,119 @@
+---
+interface ErrorTrackerProps {
+  enabled?: boolean;
+  environment?: 'development' | 'production';
+}
+
+const {
+  enabled = true,
+  environment = import.meta.env.PROD ? 'production' : 'development'
+} = Astro.props;
+
+const shouldTrack = enabled && environment === 'production';
+---
+
+{shouldTrack && (
+  <script>
+    (function() {
+      const errorQueue = [];
+
+      function reportError(error, context = {}) {
+        if (!shouldTrack) return;
+        
+        const errorData = {
+          message: error.message || 'Unknown error',
+          stack: error.stack || '',
+          name: error.name || 'Error',
+          context: {
+            url: window.location.href,
+            referrer: document.referrer,
+            timestamp: new Date().toISOString(),
+            ...context
+          }
+        };
+
+        errorQueue.push(errorData);
+        
+        console.error('Error tracked:', errorData);
+
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'exception', {
+            description: error.message,
+            fatal: false
+          });
+        }
+      }
+
+      window.addEventListener('error', (event) => {
+        reportError(event.error || new Error(event.message), {
+          type: 'global',
+          filename: event.filename,
+          lineNumber: event.lineno,
+          columnNumber: event.colno
+        });
+      });
+
+      window.addEventListener('unhandledrejection', (event) => {
+        reportError(event.reason || new Error('Unhandled promise rejection'), {
+          type: 'promise'
+        });
+      });
+
+      window.trackError = reportError;
+
+      const originalFetch = window.fetch;
+      window.fetch = async function(...args) {
+        const startTime = performance.now();
+        try {
+          const response = await originalFetch(...args);
+          const duration = performance.now() - startTime;
+          
+          if (!response.ok) {
+            reportError(new Error(`HTTP error: ${response.status}`), {
+              type: 'fetch',
+              url: args[0] instanceof Request ? args[0].url : args[0],
+              status: response.status,
+              duration
+            });
+          }
+          
+          if (typeof window.gtag === 'function') {
+            window.gtag('event', 'fetch', {
+              event_category: 'performance',
+              event_label: args[0] instanceof Request ? args[0].url : args[0],
+              value: Math.round(duration)
+            });
+          }
+          
+          return response;
+        } catch (error) {
+          const duration = performance.now() - startTime;
+          reportError(error, {
+            type: 'fetch',
+            url: args[0] instanceof Request ? args[0].url : args[0],
+            duration
+          });
+          throw error;
+        }
+      };
+
+      if ('PerformanceObserver' in window) {
+        const observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (entry.entryType === 'measure') {
+              if (typeof window.gtag === 'function') {
+                window.gtag('event', 'performance_measure', {
+                  event_category: 'performance',
+                  event_label: entry.name,
+                  value: Math.round(entry.duration)
+                });
+              }
+            }
+          }
+        });
+        
+        observer.observe({ entryTypes: ['measure', 'navigation'] });
+      }
+    })();
+  </script>
+)}

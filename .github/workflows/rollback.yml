@@ -1,0 +1,62 @@
+name: Emergency Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA to rollback to (optional, uses last successful deploy'
+        required: false
+        type: string
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Determine target commit
+        id: determine-commit
+        run: |
+          if [ -n "${{ github.event.inputs.commit_sha }}" ]; then
+            echo "TARGET_SHA=${{ github.event.inputs.commit_sha }}" >> $GITHUB_OUTPUT
+          else
+            # Get last successful deploy commit from git log
+            LAST_SUCCESS=$(git log --grep="deploy" --oneline | head -n 1 | cut -d ' ' -f 1)
+            if [ -z "$LAST_SUCCESS" ]; then
+              LAST_SUCCESS=$(git log --oneline -n 2 | tail -n 1 | cut -d ' ' -f 1)
+            fi
+            echo "TARGET_SHA=$LAST_SUCCESS" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Checkout target commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.determine-commit.outputs.TARGET_SHA }}
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build Astro site
+        run: npm run build
+        env:
+          CDN_URL: https://${{ secrets.CDN_DOMAIN }}
+          PUBLIC_CDN_URL: https://${{ secrets.CDN_DOMAIN }}
+      
+      - name: Rollback to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: fabletech
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

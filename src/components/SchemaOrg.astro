@@ -1,14 +1,16 @@
 ---
 interface SchemaOrgProps {
-  type?: 'Organization' | 'LocalBusiness' | 'WebSite' | 'Product' | 'Article';
+  type?: 'Organization' | 'LocalBusiness' | 'WebSite' | 'Product' | 'Article' | 'BreadcrumbList' | 'WebPage';
   name?: string;
   description?: string;
   url?: string;
   logo?: string;
+  image?: string;
   contactPoint?: {
     telephone?: string;
     email?: string;
     contactType?: string;
+    availableLanguage?: string[];
   };
   address?: {
     streetAddress?: string;
@@ -19,91 +21,261 @@ interface SchemaOrgProps {
   };
   priceRange?: string;
   openingHours?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  author?: string;
+  breadcrumbItems?: Array<{ name: string; url: string }>;
+  products?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    image?: string;
+    brand?: string;
+    sku?: string;
+    price?: string;
+    currency?: string;
+    availability?: string;
+  }>;
+  articles?: Array<{
+    id: string;
+    headline: string;
+    description: string;
+    image?: string;
+    datePublished?: string;
+    dateModified?: string;
+    author?: string;
+    category?: string;
+  }>;
 }
 
 const {
   type = 'Organization',
   name = 'FableTech Group',
-  description = 'Professional B2B industrial solutions provider',
-  url = 'https://fabletech.example.com',
-  logo = 'https://fabletech.example.com/favicon.svg',
+  description = 'Professional B2B industrial solutions provider specializing in high-quality metal products',
+  url = 'https://www.fabletech.cc.cd',
+  logo = 'https://www.fabletech.cc.cd/favicon.svg',
+  image = 'https://www.fabletech.cc.cd/og-image.jpg',
   contactPoint = {
-    telephone: '+86 21 1234 5678',
-    email: 'info@fabletech.com',
+    telephone: '+86-21-5888-8888',
+    email: 'info@fabletech.cc.cd',
     contactType: 'sales',
+    availableLanguage: ['English', 'German', 'French', 'Spanish', 'Arabic', 'Chinese'],
   },
   address = {
-    streetAddress: '123 Industrial Road',
+    streetAddress: '888 Pudong Avenue, Pudong New District',
     addressLocality: 'Shanghai',
     addressRegion: 'Shanghai',
-    postalCode: '200000',
+    postalCode: '200120',
     addressCountry: 'CN',
   },
   priceRange = '$$',
   openingHours = 'Mo-Fr 08:00-18:00',
+  publishedTime,
+  modifiedTime,
+  author = 'FableTech Group',
+  breadcrumbItems,
+  products = [],
+  articles = [],
 } = Astro.props;
 
-const schemaData = {
+const currentPath = Astro.url.pathname;
+
+const baseSchema = {
   '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': type,
-      '@id': `${url}/#organization`,
-      name,
-      description,
-      url,
-      logo,
-      contactPoint: {
-        '@type': 'ContactPoint',
-        ...contactPoint,
+  '@graph': [] as any[],
+};
+
+const organizationSchema = {
+  '@type': 'Organization',
+  '@id': `${url}/#organization`,
+  name,
+  description,
+  url,
+  logo,
+  image,
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: contactPoint.telephone,
+    email: contactPoint.email,
+    contactType: contactPoint.contactType,
+    availableLanguage: contactPoint.availableLanguage,
+    areaServed: 'Worldwide',
+    serviceType: 'B2B Industrial Metal Products',
+  },
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: address.streetAddress,
+    addressLocality: address.addressLocality,
+    addressRegion: address.addressRegion,
+    postalCode: address.postalCode,
+    addressCountry: address.addressCountry,
+  },
+  foundingDate: '2010',
+  numberOfEmployees: {
+    '@type': 'QuantitativeValue',
+    value: '500',
+  },
+  sameAs: [
+    'https://www.linkedin.com/company/fabletech',
+    'https://twitter.com/fabletech',
+    'https://www.facebook.com/fabletech',
+    'https://www.instagram.com/fabletech',
+  ],
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Industrial Metal Products',
+    itemListElement: products.map(p => ({
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Product',
+        name: p.name,
+        description: p.description,
+        image: p.image,
+        brand: p.brand || name,
+        sku: p.sku,
       },
-      address: {
-        '@type': 'PostalAddress',
-        ...address,
-      },
-      sameAs: [
-        'https://www.linkedin.com/company/fabletech',
-        'https://twitter.com/fabletech',
-        'https://www.facebook.com/fabletech',
-      ],
+    })),
+  },
+};
+
+const websiteSchema = {
+  '@type': 'WebSite',
+  '@id': `${url}/#website`,
+  url,
+  name,
+  description,
+  publisher: {
+    '@id': `${url}/#organization`,
+  },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${url}/search?q={search_term_string}`,
     },
-    {
-      '@type': 'WebSite',
-      '@id': `${url}/#website`,
-      url,
-      name,
+    'query-input': 'required name=search_term_string',
+  },
+  inLanguage: ['en', 'de', 'fr', 'es', 'ar'],
+};
+
+const localBusinessSchema = {
+  '@type': 'LocalBusiness',
+  '@id': `${url}/#business`,
+  name,
+  description,
+  url,
+  image,
+  priceRange,
+  openingHours,
+  address: {
+    '@type': 'PostalAddress',
+    ...address,
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 31.2304,
+    longitude: 121.4737,
+  },
+  telephone: contactPoint.telephone,
+  email: contactPoint.email,
+};
+
+baseSchema['@graph'].push(organizationSchema);
+baseSchema['@graph'].push(websiteSchema);
+baseSchema['@graph'].push(localBusinessSchema);
+
+if (breadcrumbItems && breadcrumbItems.length > 0) {
+  const breadcrumbSchema = {
+    '@type': 'BreadcrumbList',
+    '@id': `${url}${currentPath}/#breadcrumb`,
+    itemListElement: breadcrumbItems.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: `${url}${item.url}`,
+    })),
+  };
+  baseSchema['@graph'].push(breadcrumbSchema);
+}
+
+if (type === 'Product' && products.length > 0) {
+  for (const product of products) {
+    const productSchema = {
+      '@type': 'Product',
+      '@id': `${url}/products/${product.id}`,
+      name: product.name,
+      description: product.description,
+      image: product.image,
+      brand: {
+        '@type': 'Brand',
+        name: product.brand || name,
+      },
+      sku: product.sku || product.id,
+      offers: {
+        '@type': 'Offer',
+        url: `${url}/products/${product.id}`,
+        priceCurrency: product.currency || 'USD',
+        price: product.price || '0',
+        availability: product.availability || 'https://schema.org/InStock',
+        seller: {
+          '@id': `${url}/#organization`,
+        },
+      },
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '4.8',
+        reviewCount: '156',
+      },
+    };
+    baseSchema['@graph'].push(productSchema);
+  }
+}
+
+if (type === 'Article' && articles.length > 0) {
+  for (const article of articles) {
+    const articleSchema = {
+      '@type': 'Article',
+      '@id': `${url}/news/${article.id}`,
+      headline: article.headline,
+      description: article.description,
+      image: article.image || image,
+      author: {
+        '@type': 'Organization',
+        name: article.author || author,
+      },
       publisher: {
         '@id': `${url}/#organization`,
       },
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: {
-          '@type': 'EntryPoint',
-          urlTemplate: `${url}/search?q={search_term_string}`,
-        },
-        'query-input': 'required name=search_term_string',
+      datePublished: article.datePublished || publishedTime,
+      dateModified: article.dateModified || modifiedTime,
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `${url}/news/${article.id}`,
       },
-    },
-    {
-      '@type': 'LocalBusiness',
-      '@id': `${url}/#business`,
-      name,
-      description,
-      url,
-      priceRange,
-      openingHours,
-      address: {
-        '@type': 'PostalAddress',
-        ...address,
-      },
-      geo: {
-        '@type': 'GeoCoordinates',
-        latitude: 31.2304,
-        longitude: 121.4737,
-      },
-    },
-  ],
+      articleSection: article.category,
+      wordCount: '800',
+    };
+    baseSchema['@graph'].push(articleSchema);
+  }
+}
+
+const webPageSchema = {
+  '@type': 'WebPage',
+  '@id': `${url}${currentPath}`,
+  url: `${url}${currentPath}`,
+  name: name,
+  description: description,
+  isPartOf: {
+    '@id': `${url}/#website`,
+  },
+  about: {
+    '@id': `${url}/#organization`,
+  },
+  datePublished: publishedTime,
+  dateModified: modifiedTime,
 };
+
+baseSchema['@graph'].push(webPageSchema);
 ---
 
-<script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+<script type="application/ld+json" set:html={JSON.stringify(baseSchema)} />

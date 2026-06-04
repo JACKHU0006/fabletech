@@ -1,16 +1,8 @@
-# Security Contact Information for FableTech Group
-# https://fabletech.example.com/.well-known/security.txt
-
-Contact: mailto:security@fabletech.com
-Expires: 2025-12-31T23:59:59.000Z
-
-Encryption: https://fabletech.example.com/.well-known/pgp-key.txt
-
+Contact: mailto:security@fabletech.cc.cd
+Contact: https://www.fabletech.cc.cd/contact
+Encryption: https://keys.openpgp.org/vks/v1/by-fingerprint/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Acknowledgement: https://www.fabletech.cc.cd/security/acknowledgements
+Policy: https://www.fabletech.cc.cd/security/policy
+Hiring: https://www.fabletech.cc.cd/careers
 Preferred-Languages: en, de, fr, es, ar
-
-# Security Acknowledgments
-# We appreciate responsible disclosure of security vulnerabilities
-
-# FableTech Group Security Policy
-# For security concerns, please contact us through the channels above
-# Response time: Within 48 hours for critical issues
+Canonical: https://www.fabletech.cc.cd/.well-known/security.txt

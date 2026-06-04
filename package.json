@@ -12,12 +12,15 @@
     "astro": "npx astro"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^13.6.1",
     "@astrojs/sitemap": "^3.7.3",
     "@lucide/astro": "^1.17.0",
     "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/postcss": "^4.3.0",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.4.2",
+    "googleapis": "^173.0.0",
+    "resend": "^6.12.4",
     "tailwindcss": "^3.4.19"
   }
 }

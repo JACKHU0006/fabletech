@@ -10,6 +10,7 @@ import SEO from '../components/SEO.astro';
 import SchemaOrg from '../components/SchemaOrg.astro';
 import GoogleAnalytics from '../components/GoogleAnalytics.astro';
 import GoogleTagManager from '../components/GoogleTagManager.astro';
+import ErrorTracker from '../components/ErrorTracker.astro';
 import '../style.css';
 
 interface MainLayoutProps {
@@ -70,13 +71,6 @@ function getHreflangUrl(lang: string) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght400;500;600;700&display=swap" rel="stylesheet" />
     
-    <link rel="alternate" hreflang="en" href={getHreflangUrl('en')} />
-    <link rel="alternate" hreflang="de" href={getHreflangUrl('de')} />
-    <link rel="alternate" hreflang="fr" href={getHreflangUrl('fr')} />
-    <link rel="alternate" hreflang="es" href={getHreflangUrl('es')} />
-    <link rel="alternate" hreflang="ar" href={getHreflangUrl('ar')} />
-    <link rel="alternate" hreflang="x-default" href={getHreflangUrl('en')} />
-    
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -91,5 +85,6 @@ function getHreflangUrl(lang: string) {
     <BackToTop />
     <CookieBanner locale={locale} />
     <ContactButtons />
+    <ErrorTracker />
   </body>
 </html>

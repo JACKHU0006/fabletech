@@ -1,167 +1,28 @@
-# robots.txt - FableTech Group
-# Industrial Metal Products Manufacturer
-# Version: 2.0 | Updated: 2026-05-19
-
-# ============================================
-# ALLOW ALL LEGITIMATE CRAWLERS
-# ============================================
-
 User-agent: *
 Allow: /
-
-# ============================================
-# DISALLOW PRIVATE/ADMIN AREAS
-# ============================================
-
+Disallow: /api/
 Disallow: /auth/
 Disallow: /dashboard/
 Disallow: /admin/
-Disallow: /api/
-
-# ============================================
-# SITEMAP LOCATIONS
-# ============================================
+Disallow: /_astro/
 
 Sitemap: https://www.fabletech.cc.cd/sitemap.xml
-Sitemap: https://www.fabletech.cc.cd/sitemap-index.xml
-
-# ============================================
-# CRAWL DELAY (Optional, for polite bots)
-# ============================================
-
-Crawl-delay: 1
-
-# ============================================
-# HOST DIRECTIVE
-# ============================================
-
 Host: https://www.fabletech.cc.cd
 
-# ============================================
-# AI SEARCH ENGINE CRAWLERS (GEO)
-# ============================================
-
-# Google AI Overviews & SGE
-User-agent: Google-Extended
+User-agent: Googlebot
 Allow: /
 
-# Perplexity AI
-User-agent: PerplexityBot
+User-agent: Bingbot
 Allow: /
 
-# OpenAI Search
-User-agent: OAI-SearchBot
+User-agent: Baiduspider
 Allow: /
 
-# Apple Intelligence
-User-agent: Applebot-Extended
+User-agent: YandexBot
 Allow: /
 
-# Other AI Search Engines
-User-agent: GPTBot
+User-agent: DuckDuckBot
 Allow: /
-
-User-agent: GoogleOther
-Allow: /
-
-# ============================================
-# IMAGE SEARCH ENGINES
-# ============================================
-
-User-agent: Googlebot-Image
-Allow: /images/
-Allow: /products/
-
-User-agent: Bingbot-Image
-Allow: /images/
-Allow: /products/
-
-User-agent: YandexImages
-Allow: /images/
-Allow: /products/
-
-# ============================================
-# VIDEO SEARCH ENGINES
-# ============================================
-
-User-agent: Googlebot-Video
-Allow: /videos/
-
-User-agent: bingbot-video
-Allow: /videos/
-
-# ============================================
-# NEWS CRAWLERS
-# ============================================
-
-User-agent: Googlebot-News
-Allow: /news/
-
-User-agent: Bingbot-News
-Allow: /news/
-
-# ============================================
-# BLOCKED BOTS (Malicious/Aggressive)
-# ============================================
-
-User-agent: AhrefsBot
-Disallow: /
-
-User-agent: SemrushBot
-Disallow: /
 
 User-agent: MJ12bot
 Disallow: /
-
-User-agent: DotBot
-Disallow: /
-
-User-agent: MegaIndex
-Disallow: /
-
-User-agent: Zoominfobot
-Disallow: /
-
-User-agent: SputnikBot
-Disallow: /
-
-User-agent: Uptimebot
-Disallow: /
-
-User-agent: Nimbot
-Disallow: /
-
-User-agent: DomainStatsBot
-Disallow: /
-
-User-agent: Scrapy
-Disallow: /
-
-User-agent: Hydra
-Disallow: /
-
-User-agent: masscan
-Disallow: /
-
-User-agent: Blackhole
-Disallow: /
-
-# ============================================
-# SPECIAL INSTRUCTIONS
-# ============================================
-
-# Allow search engines to index all public pages
-# Recommended for standard crawling
-
-# AI training opt-out (optional)
-# Uncomment to prevent AI training on content
-# User-agent: GPTBot
-# Disallow: /
-
-# ============================================
-# LANGUAGE VERSIONS (hreflang)
-# ============================================
-
-# Primary site - English
-# Additional language versions configured via HTML tags
-# Supported: en, de, fr, es, ar

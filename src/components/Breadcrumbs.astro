@@ -1,47 +1,111 @@
 ---
+import { Home } from '@lucide/astro';
+
 interface BreadcrumbsProps {
   items: Array<{
-    name: string;
+    name: string | Record<string, string>;
     href: string;
   }>;
   locale?: string;
+  showHome?: boolean;
 }
 
-const { items, locale = 'en' } = Astro.props;
+const { 
+  items, 
+  locale = 'en', 
+  showHome = true
+} = Astro.props;
+
+const homeLabels: Record<string, string> = {
+  en: 'Home',
+  de: 'Startseite',
+  fr: 'Accueil',
+  es: 'Inicio',
+  ar: 'الرئيسية'
+};
+
+const siteUrl = 'https://www.fabletech.cc.cd';
+
+function getItemName(item: { name: string | Record<string, string>; href: string }): string {
+  if (typeof item.name === 'string') {
+    return item.name;
+  }
+  return item.name[locale] || item.name['en'] || item.name;
+}
 
 const breadcrumbsSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
-  itemListElement: items.map((item, index) => ({
-    '@type': 'ListItem',
-    position: index + 1,
-    name: item.name,
-    item: item.href.startsWith('http') ? item.href : `https://fabletech.example.com${item.href}`,
-  })),
+  itemListElement: [
+    ...(showHome ? [{
+      '@type': 'ListItem',
+      position: 1,
+      name: homeLabels[locale] || homeLabels['en'],
+      item: siteUrl,
+    }] : []),
+    ...items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + (showHome ? 2 : 1),
+      name: getItemName(item),
+      item: `${siteUrl}${item.href}`,
+    })),
+  ],
 };
 ---
 
-<nav aria-label="Breadcrumb" class="mb-4">
-  <ol class="flex items-center space-x-2 text-sm">
-    <li>
-      <a href="/" class="text-gray-500 hover:text-primary transition-colors">
-        Home
-      </a>
-    </li>
-    {items.map((item, index) => (
-      <li class="flex items-center">
-        <span class="mx-2 text-gray-400">/</span>
-        {index === items.length - 1 ? (
-          <span class="text-gray-900 font-medium" aria-current="page">
-            {item.name}
-          </span>
-        ) : (
-          <a href={item.href} class="text-gray-500 hover:text-primary transition-colors">
-            {item.name}
+<nav aria-label="Breadcrumb" class="mb-6">
+  <ol class="flex items-center flex-wrap text-sm sm:text-base" role="list">
+    {showHome && (
+      <>
+        <li class="flex items-center">
+          <a 
+            href="/" 
+            class="flex items-center text-gray-600 hover:text-primary transition-colors"
+          >
+            <Home class="w-4 h-4 mr-1" />
+            <span class="hidden sm:inline">{homeLabels[locale]}</span>
           </a>
-        )}
-      </li>
-    ))}
+        </li>
+        <li class="flex items-center text-gray-400 mx-2">
+          /
+        </li>
+      </>
+    )}
+    
+    {items.map((item, index) => {
+      const isLast = index === items.length - 1;
+      const itemName = getItemName(item);
+      
+      if (!isLast) {
+        return (
+          <>
+            <li class="flex items-center">
+              <a 
+                href={item.href}
+                class="text-gray-600 hover:text-primary transition-colors truncate max-w-[150px] sm:max-w-[200px]"
+                title={itemName}
+              >
+                {itemName}
+              </a>
+            </li>
+            <li class="flex items-center text-gray-400 mx-2">
+              /
+            </li>
+          </>
+        );
+      }
+      
+      return (
+        <li class="flex items-center">
+          <span 
+            class="text-gray-900 font-medium truncate max-w-[200px] sm:max-w-[300px]" 
+            aria-current="page"
+          >
+            {itemName}
+          </span>
+        </li>
+      );
+    })}
   </ol>
 </nav>
 

@@ -15,4 +15,7 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
+  build: {
+    assets: '_astro',
+  },
 });

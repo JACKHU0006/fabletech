@@ -1,4 +1,6 @@
 ---
+import { getImageUrl } from '../utils/images';
+
 interface OptimizedImageProps {
   src: string;
   alt: string;
@@ -7,6 +9,10 @@ interface OptimizedImageProps {
   class?: string;
   loading?: 'lazy' | 'eager';
   decoding?: 'async' | 'sync' | 'auto';
+  responsive?: boolean;
+  breakpoints?: number[];
+  quality?: string;
+  format?: string;
 }
 
 const { 
@@ -16,28 +22,77 @@ const {
   height = 600, 
   class: className = '',
   loading = 'lazy',
-  decoding = 'async'
+  decoding = 'async',
+  responsive = true,
+  breakpoints = [480, 768, 1024, 1280],
+  quality = 'auto',
+  format = 'auto'
 } = Astro.props;
+
+const aspectRatio = height > 0 ? (width / height) : 16/9;
+
+function getSrcSet(): string {
+  if (!responsive) {
+    const optimizedUrl = getImageUrl(src, { width, quality, format });
+    return `${optimizedUrl} ${width}w`;
+  }
+  
+  return breakpoints.map(bp => {
+    const optimizedUrl = getImageUrl(src, { width: bp, quality, format });
+    return `${optimizedUrl} ${bp}w`;
+  }).join(', ');
+}
+
+const sizes = responsive 
+  ? '(max-width: 480px) 480px, (max-width: 768px) 768px, (max-width: 1024px) 1024px, 1280px'
+  : `${width}px`;
+
+const fallbackUrl = getImageUrl(src, { width, quality, format });
 ---
 
-<picture>
-  <source 
-    srcSet={`${src.replace(/\.(jpg|jpeg|png)$/, '.webp')}`} 
-    type="image/webp"
-  />
-  <source 
-    srcSet={src} 
-    type={`image/${src.split('.').pop()}`}
-  />
-  <img
-    src={src}
-    alt={alt}
-    width={width}
-    height={height}
-    class={`${className}`}
-    loading={loading}
-    decoding={decoding}
-    onload="this.style.opacity='1'"
-    style="opacity: 0; transition: opacity 0.3s ease-in-out;"
-  />
-</picture>
+<div class={`relative overflow-hidden bg-gray-200 ${className}`} style={`aspect-ratio: ${aspectRatio}`}>
+  <div class="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" style="background-size: 200% 100%; animation: shimmer 1.5s infinite linear;"></div>
+  
+  <picture>
+    <source 
+      srcSet={getSrcSet()}
+      sizes={sizes}
+      type="image/webp"
+    />
+    <source 
+      srcSet={getSrcSet()}
+      sizes={sizes}
+      type={`image/${src.split('.').pop()}`}
+    />
+    <img
+      src={fallbackUrl}
+      alt={alt}
+      width={width}
+      height={height}
+      class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+      loading={loading}
+      decoding={decoding}
+      sizes={sizes}
+      srcSet={getSrcSet()}
+      onload="this.style.opacity='1'; this.previousElementSibling?.previousElementSibling?.style.display='none';"
+      style="opacity: 0;"
+    />
+  </picture>
+  
+  <noscript>
+    <img
+      src={fallbackUrl}
+      alt={alt}
+      width={width}
+      height={height}
+      class="w-full h-full object-cover"
+    />
+  </noscript>
+</div>
+
+<style>
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+</style>

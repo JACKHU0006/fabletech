@@ -3,7 +3,7 @@ import MainLayout from '../layouts/MainLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import { Award, Globe, TrendingUp, Users, Target, History } from '@lucide/astro';
 
-const locale = 'en';
+const locale = Astro.locale;
 
 const breadcrumbItems = [
   { name: 'About Us', href: '/about' }

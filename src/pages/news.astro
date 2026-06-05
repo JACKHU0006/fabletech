@@ -5,7 +5,7 @@ import InquiryForm from '../components/InquiryForm.astro';
 import { Calendar, ArrowRight, Filter } from '@lucide/astro';
 import { sortedNews, getNewsCategories } from '../data/news';
 
-const locale = 'en';
+const locale = Astro.locale;
 const categories = getNewsCategories();
 
 const selectedCategory = Astro.url.searchParams.get('category') || 'all';

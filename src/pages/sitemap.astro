@@ -2,7 +2,7 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 
-const locale = 'en';
+const locale = Astro.locale;
 
 const breadcrumbItems = [
   { name: 'Sitemap', href: '/sitemap' }

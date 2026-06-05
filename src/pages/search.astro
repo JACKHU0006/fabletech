@@ -4,7 +4,7 @@ import Breadcrumbs from '../components/Breadcrumbs.astro';
 import { Search, ArrowRight, Package, FileText, Home, Filter, X } from '@lucide/astro';
 import { search, searchData, type SearchResult } from '../data/search';
 
-const locale = Astro.url.searchParams.get('lang') || 'en';
+const locale = Astro.locale;
 const query = Astro.url.searchParams.get('q') || '';
 const filterType = Astro.url.searchParams.get('type') || '';
 

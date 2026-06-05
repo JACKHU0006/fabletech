@@ -31,7 +31,7 @@ const productSchema = {
   "@context": "https://schema.org",
   "@type": "Product",
   name,
-  description: description.replace(/<[^>]*>/g, '').substring(0, 500),
+  description: description ? description.replace(/<[^>]*>/g, '').substring(0, 500) : undefined,
   image: image ? [image] : undefined,
   brand: {
     "@type": "Brand",

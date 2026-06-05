@@ -7,7 +7,7 @@ import { Search, Filter, Grid, List, ArrowRight, Lock, Eye, User } from '@lucide
 import { products, getProductCategories } from '../data/products';
 import { supabase, getCurrentUser } from '../lib/supabase';
 
-const locale = 'en';
+const locale = Astro.locale;
 const categories = getProductCategories();
 const user = supabase ? await getCurrentUser() : null;
 const isAuthenticated = !!user;

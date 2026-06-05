@@ -6,15 +6,21 @@ import { Calendar, ArrowRight, Filter } from '@lucide/astro';
 import { news, getNewsCategories } from '../../data/news';
 
 export async function getStaticPaths() {
+  const languages = ['en', 'de', 'fr', 'es', 'ar'];
   const categories = getNewsCategories();
-  return categories.map((category) => ({
-    params: { category: category.toLowerCase().replace(/\s+/g, '-') },
-    props: { category },
-  }));
+  const paths = [];
+  for (const lang of languages) {
+    for (const category of categories) {
+      paths.push({
+        params: { category: category.toLowerCase().replace(/\s+/g, '-') },
+        props: { category, locale: lang },
+      });
+    }
+  }
+  return paths;
 }
 
-const locale = 'en';
-const { category } = Astro.props;
+const { category, locale } = Astro.props;
 const categories = getNewsCategories();
 
 const filteredNews = news.filter(n => n.category === category);
@@ -54,7 +60,7 @@ const pageTitle = category === 'all' ? 'Latest News & Events' : category;
         </div>
         <h1 class="text-4xl md:text-5xl font-bold mb-4">{pageTitle}</h1>
         <p class="text-lg text-gray-200">
-          Browse all FableTech news in the {category} category
+          {locale === 'en' ? 'Browse all FableTech news in the' : locale === 'de' ? 'Durchsuchen Sie alle FableTech-Nachrichten in der Kategorie' : locale === 'fr' ? 'Parcourez toutes les nouvelles FableTech dans la catégorie' : locale === 'es' ? 'Navega por todas las noticias de FableTech en la categoría' : 'تصفح جميع أخبار FableTech في الفئة'} {category}
         </p>
       </div>
     </div>
@@ -64,7 +70,7 @@ const pageTitle = category === 'all' ? 'Latest News & Events' : category;
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center gap-3 mb-8">
         <Filter class="h-5 w-5 text-gray-600" />
-        <span class="text-gray-600 font-medium">Filter by Category:</span>
+        <span class="text-gray-600 font-medium">{locale === 'en' ? 'Filter by Category:' : locale === 'de' ? 'Nach Kategorie filtern:' : locale === 'fr' ? 'Filtrer par catégorie:' : locale === 'es' ? 'Filtrar por categoría:' : 'التصفية حسب الفئة:'}</span>
         <div class="flex flex-wrap gap-2">
           <a 
             href="/news" 
@@ -74,7 +80,7 @@ const pageTitle = category === 'all' ? 'Latest News & Events' : category;
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            All News
+            {locale === 'en' ? 'All News' : locale === 'de' ? 'Alle Nachrichten' : locale === 'fr' ? 'Toutes les nouvelles' : locale === 'es' ? 'Todas las noticias' : 'جميع الأخبار'}
           </a>
           {categories.map((cat) => (
             <a 
@@ -95,10 +101,10 @@ const pageTitle = category === 'all' ? 'Latest News & Events' : category;
       {filteredNews.length === 0 ? (
         <div class="text-center py-16">
           <div class="text-6xl mb-4">📰</div>
-          <h3 class="text-2xl font-semibold text-gray-900 mb-2">No News Found</h3>
-          <p class="text-gray-600 mb-6">There are no articles in the {category} category yet.</p>
+          <h3 class="text-2xl font-semibold text-gray-900 mb-2">{locale === 'en' ? 'No News Found' : locale === 'de' ? 'Keine Nachrichten gefunden' : locale === 'fr' ? 'Aucune nouvelle trouvée' : locale === 'es' ? 'No se encontraron noticias' : 'لم يتم العثور على أخبار'}</h3>
+          <p class="text-gray-600 mb-6">{locale === 'en' ? 'There are no articles in the' : locale === 'de' ? 'Es gibt noch keine Artikel in der Kategorie' : locale === 'fr' ? 'Il n\'y a pas encore d\'articles dans la catégorie' : locale === 'es' ? 'No hay artículos en la categoría' : 'لا توجد مقالات في الفئة'} {category} {locale === 'en' ? 'category yet.' : locale === 'de' ? '.' : locale === 'fr' ? '.' : locale === 'es' ? '.' : 'حتى الآن.'}</p>
           <a href="/news" class="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
-            View All News
+            {locale === 'en' ? 'View All News' : locale === 'de' ? 'Alle Nachrichten anzeigen' : locale === 'fr' ? 'Voir toutes les nouvelles' : locale === 'es' ? 'Ver todas las noticias' : 'عرض جميع الأخبار'}
             <ArrowRight class="ml-2 h-5 w-5" />
           </a>
         </div>
@@ -106,9 +112,9 @@ const pageTitle = category === 'all' ? 'Latest News & Events' : category;
         <>
           <div class="flex items-center justify-between mb-6">
             <p class="text-gray-600">
-              Showing <span class="font-semibold text-gray-900">{filteredNews.length}</span> 
-              {filteredNews.length === 1 ? 'article' : 'articles'}
-              in {category}
+              {locale === 'en' ? 'Showing' : locale === 'de' ? 'Zeige' : locale === 'fr' ? 'Affichage de' : locale === 'es' ? 'Mostrando' : 'عرض'} <span class="font-semibold text-gray-900">{filteredNews.length}</span> 
+              {filteredNews.length === 1 ? (locale === 'en' ? 'article' : locale === 'de' ? 'Artikel' : locale === 'fr' ? 'article' : locale === 'es' ? 'artículo' : 'مقال') : (locale === 'en' ? 'articles' : locale === 'de' ? 'Artikel' : locale === 'fr' ? 'articles' : locale === 'es' ? 'artículos' : 'مقالات')}
+              {locale === 'en' ? 'in' : locale === 'de' ? 'in' : locale === 'fr' ? 'dans' : locale === 'es' ? 'en' : 'في'} {category}
             </p>
           </div>
 
@@ -131,7 +137,7 @@ const pageTitle = category === 'all' ? 'Latest News & Events' : category;
                 <div class="p-6">
                   <div class="flex items-center text-gray-500 text-sm mb-3">
                     <Calendar class="h-4 w-4 mr-2" />
-                    {new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date(item.date).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' })}
                   </div>
                   <h2 class="text-xl font-semibold mb-3 group-hover:text-primary transition-colors line-clamp-2">
                     {item.title[locale]}
@@ -141,7 +147,7 @@ const pageTitle = category === 'all' ? 'Latest News & Events' : category;
                     href={`/news/${item.slug}`} 
                     class="inline-flex items-center text-secondary font-semibold hover:underline group"
                   >
-                    Read Full Article
+                    {locale === 'en' ? 'Read Full Article' : locale === 'de' ? 'Vollständigen Artikel lesen' : locale === 'fr' ? 'Lire l\'article complet' : locale === 'es' ? 'Leer artículo completo' : 'اقرأ المقالة الكاملة'}
                     <ArrowRight class="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </a>
                 </div>
@@ -157,9 +163,9 @@ const pageTitle = category === 'all' ? 'Latest News & Events' : category;
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12">
         <div class="text-center max-w-3xl mx-auto">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Stay Connected</h2>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{locale === 'en' ? 'Stay Connected' : locale === 'de' ? 'Bleiben Sie verbunden' : locale === 'fr' ? 'Restez connecté' : locale === 'es' ? 'Manténgase conectado' : 'ابق على اتصال'}</h2>
           <p class="text-lg text-gray-600 mb-8">
-            Follow FableTech Group on social media for the latest updates, industry insights, and behind-the-scenes content.
+            {locale === 'en' ? 'Follow FableTech Group on social media for the latest updates, industry insights, and behind-the-scenes content.' : locale === 'de' ? 'Folgen Sie FableTech Group in den sozialen Medien für die neuesten Updates, Branchenkenntnisse und Hintergrundinformationen.' : locale === 'fr' ? 'Suivez FableTech Group sur les réseaux sociaux pour les dernières mises à jour, les informations sectorielles et le contenu derrières les coulisses.' : locale === 'es' ? 'Siga a FableTech Group en las redes sociales para obtener las últimas actualizaciones, conocimientos de la industria y contenido exclusivo.' : 'تابع FableTech Group على وسائل التواصل الاجتماعي للحصول على أحدث التحديثات وملاحظات الصناعة والمحتوى الخلفي.'}
           </p>
           <div class="flex flex-wrap justify-center gap-4">
             <a href="#" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
@@ -181,7 +187,8 @@ const pageTitle = category === 'all' ? 'Latest News & Events' : category;
   </section>
 
   <InquiryForm 
-    title="Subscribe to Our Newsletter"
-    subtitle="Stay updated with the latest FableTech Group industry news, product releases, and company announcements"
+    locale={locale}
+    title={locale === 'en' ? 'Subscribe to Our Newsletter' : locale === 'de' ? 'Abonnieren Sie unseren Newsletter' : locale === 'fr' ? 'Abonnez-vous à notre newsletter' : locale === 'es' ? 'Suscríbete a nuestro boletín' : 'اشترك في النشرة البريدية'}
+    subtitle={locale === 'en' ? 'Stay updated with the latest FableTech Group industry news, product releases, and company announcements' : locale === 'de' ? 'Bleiben Sie auf dem Laufenden mit den neuesten FableTech Group-Branchennachrichten, Produktveröffentlichungen und Unternehmensankündigungen' : locale === 'fr' ? 'Restez informé des dernières nouvelles de l\'industrie FableTech Group, des lancements de produits et des annonces de l\'entreprise' : locale === 'es' ? 'Manténgase actualizado con las últimas noticias de la industria FableTech Group, lanzamientos de productos y anuncios de la empresa' : 'ابق على اطلاع بأحدث أخبار صناعة FableTech Group وإصدارات المنتجات وإعلانات الشركة'}
   />
 </MainLayout>
